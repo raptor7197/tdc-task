@@ -35,7 +35,7 @@ app.use('/api/ai', aiRoutes)
 
 // Hash passwords on startup if they're plaintext
 function ensureHashedPasswords(): void {
-  const mmPath = path.resolve(__dirname, './data/matchmakers.json')
+  const mmPath = path.resolve(__dirname, '../data/matchmakers.json')
   const raw = fs.readFileSync(mmPath, 'utf-8')
   const matchmakers: MatchmakerAccount[] = JSON.parse(raw)
   let changed = false

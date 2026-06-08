@@ -24,7 +24,7 @@ WORKDIR /app
 COPY --from=server-builder /server/dist/ ./dist/
 COPY server/package*.json ./
 RUN npm ci --omit=dev
-COPY server/src/data/ ./dist/data/
+COPY server/src/data/ ./data/
 
 COPY --from=client-builder /client/dist/ /usr/share/nginx/html/
 

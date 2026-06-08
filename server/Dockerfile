@@ -14,7 +14,7 @@ RUN apk add --no-cache curl
 COPY package*.json ./
 RUN npm ci --omit=dev
 COPY --from=builder /app/dist/ ./dist/
-COPY src/data/ ./dist/data/
+COPY src/data/ ./data/
 
 EXPOSE 3001
 ENV NODE_ENV=production
