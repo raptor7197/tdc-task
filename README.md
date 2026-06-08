@@ -1,123 +1,123 @@
-# TDC Matchmaker Dashboard MVP
+# tdc matchmaker dashboard
 
-A full-stack internal tool for The Date Crew matchmakers to manage customers, view profiles, compute AI-powered match suggestions, and track the matchmaking journey.
+an internal tool for the date crew matchmakers. find your customers a perfect match without losing your mind (or your eyesight staring at spreadsheets).
 
-## Tech Choices
+## how matching works
 
-**Frontend**: React 19 + Vite + TypeScript + Tailwind CSS v4 — fast dev experience, no SSR overhead. shadcn-inspired components built with Tailwind. A love-themed palette (rose/pink/gold) aligns the UI with the matchmaking context without being unprofessional.
+the algorithm compares two profiles across 10 dimensions. each dimension has a weight — think of weights like how much your mom cares about each thing when she says "i found a nice boy/girl."
 
-**Backend**: Express + TypeScript — simple REST API with JWT auth. Static JSON files serve as the data layer (120 faker-generated profiles with realistic Indian names, cities, colleges, and cultural attributes). In-memory storage handles notes and match history for MVP simplicity.
+if you're a male customer, the system expects you to be older, taller, and richer than your match. if you're a female customer, it flips the script. sue us, we didn't make the rules — society did. (you can change all this from the scoring config page if you want to live dangerously.)
 
-**AI**: OpenRouter API (OpenAI-compatible) powers three features: match compatibility explanations, personalized intro email generation, and meeting note summarization. Falls back gracefully when no API key is configured.
+```mermaid
+flowchart LR
+    A[customer profile] --> B[10 scoring dimensions]
+    B --> C1[religion/caste]
+    B --> C2[age]
+    B --> C3[education]
+    B --> C4[income]
+    B --> C5[height]
+    B --> C6[location]
+    B --> C7[want kids]
+    B --> C8[diet]
+    B --> C9[family values]
+    B --> C10[lifestyle]
+    
+    C1 --> D[gender-specific scoring]
+    C2 --> D
+    C3 --> D
+    C4 --> D
+    C5 --> D
+    C6 --> D
+    C7 --> D
+    C8 --> D
+    C9 --> D
+    C10 --> D
+    
+    D --> E[score out of 100]
+    E --> F{score >= 30?}
+    F -->|yes| G[top 15 matches]
+    F -->|no| H[ghosted]
+    
+    style H fill:#ffb4ab30,stroke:#ffb4ab
+    style G fill:#b4ffab30,stroke:#b4ffab
+```
 
-**Deployment**: Docker Compose with nginx reverse proxy. The frontend (built static files) and backend API are containerized separately. The nginx config serves the SPA and proxies `/api/*` to the Express server. Single `docker compose up -d` deploys everything.
+if a match scores below 30 out of 100, it gets thrown out. cold, we know. but you don't want to send your client on a date that's a 23/100 — that's just rude.
 
-## Matching Logic
+## the 10 dimensions (and what they actually mean)
 
-Gender-specific scoring with configurable weights (adjustable from the Scoring Config dashboard):
+| dimension | what it measures | why it matters |
+|---|---|---|
+| religion/caste | same religion? same caste? | aunties at the temple will ask |
+| age | age gap + direction | "he's mature for his age" is a red flag at 15 years |
+| education | degree level comparison | because "i'm a quick learner" isn't on the resume |
+| income | who earns what | uncomfortable but we talk about it |
+| height | who's taller | tinder showed us the data |
+| location | same city? willing to move? | long distance is hard enough without the in-laws |
+| want kids | yes, no, or maybe | "maybe" means "convince me" |
+| diet | veg, non-veg, eggetarian, jain | dinner dates get awkward otherwise |
+| family values | orthodox → liberal spectrum | how chill is your family at weddings |
+| lifestyle | pets, drinking, smoking, family type | the small stuff that becomes big stuff |
 
-**For male customers** — matches with women who are younger (2-7 year gap ideal), earn less (conventional expectation), are shorter, and share matching views on children. Religion/caste alignment is heavily weighted.
+## presets (so you don't have to think)
 
-**For female customers** — matches with men who are older (1-7 year gap), earn more, are taller, and share values around family, education, and lifestyle. Profession compatibility and education level are weighted higher.
+three built-in configs, adjustable from the scoring config page:
 
-Ten scoring dimensions: Religion/Caste, Age, Education, Income, Height, Location, Want Kids, Diet, Family Values, Lifestyle. Three presets (Traditional, Modern, Balanced) are included, plus full custom control with live preview.
+- **traditional indian** — religion/caste maxed out, age norms enforced, your grandparents would approve
+- **modern / progressive** — caste matters less, education and vibes matter more, your therapist would approve
+- **balanced** — somewhere in between, nobody fully approves but nobody's mad either
 
-## How AI Is Used
+you can also go full custom mode and slide those weight sliders around like a dj at a wedding.
 
-1. **Match Explanations**: Given two profiles, the AI writes a warm 2-3 sentence explanation of why they're compatible, referencing actual details from both profiles.
-2. **Intro Email Generation**: The AI drafts a personalized email introducing one profile to another, highlighting compatibility points and signed by the matchmaker.
-3. **Note Summarization**: Raw meeting/call notes are structured into Key Observations, Compatibility Signals, Potential Concerns, and Suggested Next Steps.
+## what ai does around here
 
-All AI features use `gpt-4o-mini` via OpenRouter (cost-effective). The system degrades gracefully with hardcoded fallbacks if the API is unavailable.
+when you click "explain match" or "write intro," it calls meta-llama/llama-3.2-3b-instruct through openrouter. costs about as much as a single toffee per request. if the api key isn't set, it falls back to hardcoded text — which is about as romantic as a form letter, but hey, it works.
 
-## Sample Login Credentials
-
-| Email | Password |
-|---|---|
-| `priya@thedatecrew.com` | `tdc2024` |
-| `rahul@thedatecrew.com` | `tdc2024` |
-
-## Quick Start (Production)
+## quick start
 
 ```bash
-# Clone and navigate
-cd tdc-project
-
-# Configure (optional — AI features need OpenRouter key)
+git clone https://github.com/raptor7197/tdc-task.git
+cd tdc-task
 cp .env.example .env
-# Edit .env with your OPENROUTER_API_KEY
-
-# Deploy
-docker compose up -d
-
-# Open http://localhost:3000
+# add your openrouter key if you want ai features
+docker compose up -d --build
 ```
 
-## Quick Start (Development)
+open http://localhost:3000 and log in with:
 
-```bash
-# Terminal 1: Backend
-cd server
-npm install
-npm run dev    # http://localhost:3001
+| email | password |
+|---|---|
+| priya@thedatecrew.com | tdc2024 |
+| rahul@thedatecrew.com | tdc2024 |
 
-# Terminal 2: Frontend
-cd client
-npm install
-npm run dev    # http://localhost:5173 (proxies API to 3001)
-```
-
-## Project Structure
+## project layout
 
 ```
 tdc-project/
-├── server/                   # Express backend
+├── server/                 # express api (profiles, matches, scoring, ai, notes)
 │   ├── src/
-│   │   ├── index.ts          # App entry point
-│   │   ├── routes/           # Auth, profiles, matches, notes, scoring, AI
-│   │   ├── middleware/       # JWT auth middleware
-│   │   ├── lib/              # Types, matching algo, OpenAI client
-│   │   └── data/             # JSON data files (profiles, matchmakers, scoring config)
-│   ├── scripts/              # Faker-based profile generator
+│   │   ├── routes/         # one file per feature
+│   │   ├── lib/            # matching algorithm, types, openrouter client
+│   │   └── data/           # 120 fake profiles, matchmakers, scoring config
 │   └── Dockerfile
-├── client/                   # React frontend
+├── client/                 # react + vite + tailwind
 │   ├── src/
-│   │   ├── pages/            # Login, Dashboard, CustomerDetail, ScoringConfig
-│   │   ├── components/       # Layout, UI, matching, scoring components
-│   │   ├── context/          # Auth context provider
-│   │   └── lib/              # Types, API client, utilities
-│   ├── nginx.conf            # SPA + API proxy config
+│   │   ├── pages/          # login, dashboard, customer detail, scoring config
+│   │   ├── context/        # auth (frontend-only, no backend calls)
+│   │   └── lib/            # api client, types, utils
+│   ├── nginx.conf          # proxies /api/ to backend, serves spa
 │   └── Dockerfile
-└── docker-compose.yml        # VM deployment orchestration
+├── docker-compose.yml      # spins up both containers
+└── Dockerfile              # combined image (for render single-container deploy)
 ```
 
-## API Endpoints
+## things we chose not to build (yet)
 
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/api/auth/login` | Login, returns JWT |
-| GET | `/api/auth/me` | Current matchmaker info |
-| GET | `/api/profiles/assigned` | My assigned profiles (with filters) |
-| GET | `/api/profiles` | All profiles (admin) |
-| GET | `/api/profiles/:id` | Single profile detail |
-| GET | `/api/matches/:profileId` | Top 15 matches for a customer |
-| POST | `/api/matches/send` | Record a match being sent |
-| GET | `/api/matches/history/:id` | Match history for a profile |
-| GET | `/api/notes/:profileId` | Notes for a customer |
-| POST | `/api/notes/:profileId` | Add a note |
-| GET | `/api/scoring/config` | Current scoring weights |
-| PUT | `/api/scoring/config` | Update weights |
-| GET | `/api/scoring/presets` | List presets |
-| POST | `/api/scoring/preview` | Live score preview |
-| POST | `/api/ai/explain` | AI match explanation |
-| POST | `/api/ai/intro` | AI intro email |
-| POST | `/api/ai/summarize-notes` | AI note summary |
+- no database — 120 static profiles and in-memory notes are fine for an mvp. postgres can wait.
+- no email sending — "send match" shows a toast and logs it. actual delivery needs sendgrid or similar.
+- no real auth — login validates against hardcoded credentials in the frontend. don't put sensitive data here.
+- no non-binary support — matching logic assumes male/female. we know. we'll get there.
 
-## Assumptions Made
+## the one thing you should know before deploying
 
-- **No database needed**: 120 static profiles (JSON) and in-memory notes/history are sufficient for an MVP. A production version would use PostgreSQL/Redis.
-- **Flat profile assignment**: Each profile is assigned to exactly one matchmaker. Real-world matchmakers might collaborate.
-- **Gender binary**: Matching logic assumes male/female. Real-world products need non-binary support.
-- **Indian context**: Profile fields and matching logic are tuned for Indian matchmaking norms (caste, religion, family values, diet, manglik status, etc.).
-- **No real email sending**: The "Send Match" action logs the event and shows a toast. Actual email/SMS delivery would require an external service.
-- **OpenRouter fallback**: AI features work without a configured key by returning static fallback text.
+set `openrouter_api_key` in your `.env` file. without it, ai features return static text. with it, they return semi-intelligent text. your call.
