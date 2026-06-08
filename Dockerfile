@@ -18,7 +18,7 @@ RUN npm run build
 
 FROM nginx:alpine
 
-RUN apk add --no-cache nodejs curl
+RUN apk add --no-cache nodejs npm curl
 
 WORKDIR /app
 COPY --from=server-builder /server/dist/ ./dist/
