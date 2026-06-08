@@ -1,0 +1,28 @@
+{
+  "activePreset": null,
+  "weights": {
+    "religionCaste": 15,
+    "age": 12,
+    "education": 12,
+    "income": 10,
+    "height": 4,
+    "location": 12,
+    "wantKids": 12,
+    "diet": 5,
+    "familyValues": 8,
+    "lifestyle": 10
+  },
+  "weightsFemale": {
+    "religionCaste": 20,
+    "age": 12,
+    "education": 15,
+    "income": 10,
+    "height": 5,
+    "location": 12,
+    "wantKids": 12,
+    "diet": 5,
+    "familyValues": 5,
+    "lifestyle": 4
+  },
+  "custom": true
+}
