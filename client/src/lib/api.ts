@@ -1,41 +1,18 @@
 const BASE_URL = '/api'
 
-function getToken(): string | null {
-  return localStorage.getItem('tdc_token')
-}
-
-function setToken(token: string): void {
-  localStorage.setItem('tdc_token', token)
-}
-
-function clearToken(): void {
-  localStorage.removeItem('tdc_token')
-}
-
 async function request<T>(
   endpoint: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const token = getToken()
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(options.headers as Record<string, string>),
-  }
-
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`
   }
 
   const response = await fetch(`${BASE_URL}${endpoint}`, {
     ...options,
     headers,
   })
-
-  if (response.status === 401) {
-    clearToken()
-    window.location.href = '/login'
-    throw new Error('Session expired')
-  }
 
   const data = await response.json()
 
@@ -47,18 +24,6 @@ async function request<T>(
 }
 
 export const api = {
-  getToken,
-  setToken,
-  clearToken,
-
-  // Auth
-  login: (email: string, password: string) =>
-    request<{ token: string; user: any }>('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password }),
-    }),
-
-  getMe: () => request<any>('/auth/me'),
 
   // Profiles
   getProfiles: (params?: Record<string, string>) => {

@@ -1,6 +1,24 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
-import { api } from '../lib/api'
 import type { User } from '../lib/types'
+
+const MATCHMAKERS = [
+  {
+    id: 'mm_001',
+    email: 'priya@thedatecrew.com',
+    password: 'tdc2024',
+    name: 'Priya Sharma',
+    avatar: 'https://api.dicebear.com/8.x/avataaars/svg?seed=Priya',
+    assignedProfileIds: Array.from({ length: 60 }, (_, i) => `profile_${String(i + 1).padStart(4, '0')}`),
+  },
+  {
+    id: 'mm_002',
+    email: 'rahul@thedatecrew.com',
+    password: 'tdc2024',
+    name: 'Rahul Verma',
+    avatar: 'https://api.dicebear.com/8.x/avataaars/svg?seed=Rahul',
+    assignedProfileIds: Array.from({ length: 60 }, (_, i) => `profile_${String(i + 61).padStart(4, '0')}`),
+  },
+]
 
 interface AuthContextType {
   user: User | null
@@ -16,27 +34,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const token = api.getToken()
-    if (token) {
-      api.getMe()
-        .then((data) => setUser(data))
-        .catch(() => {
-          api.clearToken()
-        })
-        .finally(() => setLoading(false))
-    } else {
-      setLoading(false)
+    const stored = localStorage.getItem('tdc_user')
+    if (stored) {
+      setUser(JSON.parse(stored))
     }
+    setLoading(false)
   }, [])
 
   const login = async (email: string, password: string) => {
-    const result = await api.login(email, password)
-    api.setToken(result.token)
-    setUser(result.user)
+    const matchmaker = MATCHMAKERS.find((m) => m.email === email && m.password === password)
+    if (!matchmaker) {
+      throw new Error('Invalid email or password')
+    }
+    const userData: User = {
+      id: matchmaker.id,
+      email: matchmaker.email,
+      name: matchmaker.name,
+      avatar: matchmaker.avatar,
+      assignedProfileIds: matchmaker.assignedProfileIds,
+    }
+    localStorage.setItem('tdc_user', JSON.stringify(userData))
+    setUser(userData)
   }
 
   const logout = () => {
-    api.clearToken()
+    localStorage.removeItem('tdc_user')
     setUser(null)
   }
 
